@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOCX Knowledge Library</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>📚 DOCX Knowledge Library</h1>
+    <p>This is a static site hosted on GitHub Pages. Add or update files in the <code>library/</code> folder via GitHub, and the list below updates automatically.</p>
+    <p>Machine-readable index for your copilot/agent: <a href="index.json">index.json</a></p>
+  </header>
+
+  <section class="card">
+    <h2>Documents</h2>
+    <div id="status">Loading…</div>
+    <table id="docsTable" class="hidden">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Size</th>
+          <th>Last Modified</th>
+          <th>Download</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>How to add files: In GitHub → this repo → <code>library/</code> → “Upload files”.</p>
+  </footer>
+
+  <script>
+    async function loadIndex() {
+      try {
+        const res = await fetch('index.json', {cache: 'no-store'});
+        if (!res.ok) throw new Error('Failed to fetch index.json');
+        const data = await res.json();
+        const tbody = document.querySelector('#docsTable tbody');
+        tbody.innerHTML = '';
+        data.forEach(d => {
+          const tr = document.createElement('tr');
+          const sizeKB = (d.size_bytes/1024).toFixed(1) + ' KB';
+          const date = (new Date(d.last_modified)).toLocaleString();
+          tr.innerHTML = `
+            <td>${d.name}</td>
+            <td>${sizeKB}</td>
+            <td>${date}</td>
+            <td><a href="${d.url}" download>Download</a></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        document.getElementById('status').classList.add('hidden');
+        document.getElementById('docsTable').classList.remove('hidden');
+      } catch (e) {
+        document.getElementById('status').textContent = 'Could not load index.json';
+      }
+    }
+    loadIndex();
+  </script>
+</body>
+</html>
